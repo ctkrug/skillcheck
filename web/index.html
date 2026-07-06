@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skillcheck — validate AI-agent instruction files</title>
+  <meta name="description" content="Paste a CLAUDE.md, AGENTS.md, or skill file and catch broken triggers, missing frontmatter fields, and skill-name collisions before they silently fail." />
+  <!-- Custom favicon: drafting checkmark, blueprint cyan on ink navy. Never the default globe. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B2A44'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%230E6E8C' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <header class="masthead">
+    <a class="wordmark" href="." aria-label="Skillcheck home">
+      <svg class="wordmark__glyph" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="var(--ink)"></rect>
+        <path d="M8 17l5 5 11-12" fill="none" stroke="var(--accent)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="wordmark__text"><b>skill</b><i>check</i></span>
+    </a>
+    <p class="tagline">A linter for the files that steer your agents.</p>
+    <div class="masthead__actions">
+      <button id="mute-toggle" class="icon-btn" type="button" aria-pressed="false" aria-label="Toggle sound">
+        <span data-sound-on hidden>♪</span><span data-sound-off>♪̸</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="sheet" aria-label="Skillcheck validator">
+    <div class="sheet__titleblock">
+      <div class="tb-field"><span class="tb-label">SHEET</span><span class="tb-value">SKILLCHECK · v0.1</span></div>
+      <div class="tb-field tb-field--tally">
+        <span class="tb-label">FINDINGS</span>
+        <span class="tally" id="tally" aria-live="polite">
+          <span class="tally__item tally__item--error"><b id="count-error">0</b> err</span>
+          <span class="tally__item tally__item--warn"><b id="count-warn">0</b> warn</span>
+          <span class="tally__item tally__item--info"><b id="count-info">0</b> info</span>
+        </span>
+      </div>
+      <div class="stamp" id="stamp" data-state="idle" aria-hidden="true">READY</div>
+    </div>
+
+    <div class="panes">
+      <section class="pane pane--editor" aria-label="Source file">
+        <div class="pane__bar">
+          <label class="pane__title" for="editor">source</label>
+          <div class="pane__controls">
+            <label class="field">
+              <span class="field__label">example</span>
+              <select id="example-picker" class="select">
+                <option value="">— load an example —</option>
+                <option value="clean">clean skill</option>
+                <option value="broken">broken names</option>
+                <option value="short">weak description</option>
+                <option value="unclosed">unterminated frontmatter</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="editor-wrap">
+          <div class="gutter" id="gutter" aria-hidden="true"></div>
+          <textarea id="editor" class="editor" spellcheck="false" autocomplete="off"
+            placeholder="Paste a SKILL.md, CLAUDE.md, or AGENTS.md here…"></textarea>
+        </div>
+      </section>
+
+      <section class="pane pane--report" aria-label="Validation report">
+        <div class="pane__bar">
+          <span class="pane__title">report</span>
+          <button id="copy-report" class="btn btn--ghost" type="button">copy JSON</button>
+        </div>
+        <div class="report" id="report" aria-live="polite">
+          <!-- rows injected here -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Same engine runs in your terminal:
+      <code>npx skillcheck .claude/skills</code> ·
+      <a href="https://github.com/ctkrug/skillcheck">source on GitHub</a>
+    </p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
