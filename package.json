@@ -1,0 +1,40 @@
+{
+  "name": "skillcheck",
+  "version": "0.1.0",
+  "description": "A linter and web validator for AI-agent instruction files (CLAUDE.md, AGENTS.md, skill frontmatter).",
+  "type": "module",
+  "bin": {
+    "skillcheck": "bin/skillcheck.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "bin/",
+    "src/"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "lint:self": "node bin/skillcheck.js examples",
+    "build": "node scripts/build-site.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "linter",
+    "claude",
+    "agents",
+    "skill",
+    "frontmatter",
+    "validator",
+    "ai-agents"
+  ],
+  "author": "Charlie Krug",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctkrug/skillcheck.git"
+  },
+  "dependencies": {}
+}
