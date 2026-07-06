@@ -1,0 +1,39 @@
+# Skillcheck — Rule Reference
+
+Every diagnostic Skillcheck emits carries a stable `ruleId`. This is the catalog.
+Severity is the default; a future config (`skillcheck.json`, backlog 2.5) will let
+you override per rule.
+
+| Rule ID | Default | Applies to | What it catches |
+| --- | --- | --- | --- |
+| `missing-field` | error | skill | No `name`/`description`, or an unterminated `---` block. The skill never loads. |
+| `name-format` | error / warn | skill | `name` isn't kebab-case (error); `name` doesn't match its directory (warning). |
+| `weak-trigger` | warning | skill | `description` has no "use when…" trigger language, so it won't reliably fire. |
+| `description-too-long` | warning | skill | `description` exceeds 1024 chars and risks host truncation. |
+| `description-too-short` | warning | skill | `description` under 16 chars — too terse to match a request against. |
+| `duplicate-name` | error | project | Two skills declare the same `name` and shadow each other non-deterministically. |
+
+## Why these, specifically
+
+Skillcheck models *runtime* failure modes, not YAML validity. Each rule above maps
+to a real "why isn't my skill working?" bug:
+
+- **`missing-field` / `name-format`** — the runtime resolves a skill by a
+  kebab-case `name`; get it wrong and the skill silently doesn't register.
+- **`weak-trigger` / `description-*`** — the description *is* the trigger. Without
+  "when to use" language, or when truncated, the model has nothing to match.
+- **`duplicate-name`** — invisible in any single file; only a cross-file check
+  finds it. This is the highest-value rule Skillcheck offers.
+
+## Severities and exit codes
+
+- **error** → the CLI exits `1`. Fails CI.
+- **warning** / **info** → reported, but the CLI exits `0` by default. Use
+  `--max-warnings 0` (backlog 3.2) to gate on warnings too.
+
+## Adding a rule
+
+Rules are small modules in `src/rules/`. A document rule exposes
+`{ id, appliesTo(kind), check(doc) }`; a project rule exposes
+`{ id, checkProject(docs) }`. Register it in `src/rules/index.js`, add its id to
+`allRuleIds`, and cover it in `test/rules.test.js`. No other wiring needed.
