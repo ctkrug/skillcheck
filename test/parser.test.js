@@ -97,6 +97,19 @@ test('records a repeated top-level key as a duplicate, keeping the first', () =>
   assert.equal(doc.frontmatter.duplicates[0].firstLine, 2);
 });
 
+test('only the first colon splits a key from its value', () => {
+  // A value that itself contains a colon (a ratio, a URL) must survive intact.
+  const doc = parseDocument('---\nname: demo\ndescription: use when the ratio is 3:2 here\n---\n');
+  assert.equal(doc.frontmatter.fields.description.value, 'use when the ratio is 3:2 here');
+});
+
+test('a leading UTF-8 BOM does not hide the frontmatter block', () => {
+  const doc = parseDocument('﻿---\nname: demo\ndescription: use when needed here\n---\n');
+  assert.equal(doc.frontmatter.present, true);
+  assert.equal(doc.frontmatter.closed, true);
+  assert.equal(doc.frontmatter.fields.name.value, 'demo');
+});
+
 test('ignores a non-key line inside frontmatter and keeps parsing after it', () => {
   const doc = parseDocument('---\nname: foo\njust some prose without a colon\ndescription: bar\n---\n');
   assert.equal(doc.frontmatter.fields.name.value, 'foo');
