@@ -12,40 +12,40 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 The demo everyone sees first: paste a skill file, watch it get annotated live by
 the same engine that runs in CI.
 
-- [ ] **1.1 — Paste-and-validate hero (WOW MOMENT).** A hosted page with a
+- [x] **1.1 — Paste-and-validate hero (WOW MOMENT).** A hosted page with a
   two-pane drafting table: paste/drop a file on the left, get a live annotated
   report on the right, powered by the real `src/lint.js`.
   - AC1: Loading the page and pasting `examples/broken-skill/SKILL.md` renders
-    the `name-format` error and both warnings, each with its line number.
+    the `name-format` error and both warnings, each with its line number. ✅
   - AC2: The report updates within ~200ms of editing, with no page reload and no
-    server call (engine runs in-browser).
+    server call (engine runs in-browser). ✅
   - AC3: A clean file (`examples/good-skill` in isolation) shows the "PASSED"
-    state, not a blank panel.
+    state, not a blank panel. ✅
 
-- [ ] **1.2 — Load-an-example picker.** Themed control that loads bundled example
+- [x] **1.2 — Load-an-example picker.** Themed control that loads bundled example
   files into the editor.
   - AC1: The picker lists at least "clean", "broken names", and "collision" and
-    loading one populates the editor and report.
-  - AC2: The `<select>` is fully themed (no naked native widget).
+    loading one populates the editor and report. ✅
+  - AC2: The `<select>` is fully themed (no naked native widget). ✅
 
-- [ ] **1.3 — Multi-file / collision mode.** Let the page validate more than one
+- [x] **1.3 — Multi-file / collision mode.** Let the page validate more than one
   document so the cross-file `duplicate-name` rule can fire in the browser.
   - AC1: Loading the collision example set produces a `duplicate-name` error
-    referencing the other file.
-  - AC2: Switching between files preserves each file's content.
+    referencing the other file. ✅
+  - AC2: Switching between files preserves each file's content. ✅
 
-- [ ] **1.4 — Static build + relative paths.** `npm run build` emits a
+- [x] **1.4 — Static build + relative paths.** `npm run build` emits a
   self-contained site to `dist/` using only relative asset paths.
   - AC1: `npm run build` produces `dist/index.html` plus assets and a copied
-    engine; opening `dist/index.html` works with no server.
-  - AC2: No asset URL begins with `/` (deployable under a subpath).
+    engine; opening `dist/index.html` works with no server. ✅
+  - AC2: No asset URL begins with `/` (deployable under a subpath). ✅
 
-- [ ] **1.5 — Design polish (per D1–D4).** Execute `docs/DESIGN.md`: blueprint
+- [x] **1.5 — Design polish (per D1–D4).** Execute `docs/DESIGN.md`: blueprint
   paper aesthetic, fonts, title-block stamp, favicon, interaction states.
-  - AC1: Favicon is a custom inline-SVG (not the default globe); both fonts load.
-  - AC2: Page is composed with no horizontal scroll at 390 / 768 / 1440px.
+  - AC1: Favicon is a custom inline-SVG (not the default globe); both fonts load. ✅
+  - AC2: Page is composed with no horizontal scroll at 390 / 768 / 1440px. ✅
   - AC3: The title-block status stamp shows PASSED/REVISE per result; every
-    control has hover + focus-visible states.
+    control has hover + focus-visible states. ✅
 
 ---
 
