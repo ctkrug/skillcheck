@@ -42,6 +42,7 @@ export const projectRules = [nameCollision, skillReference];
 export const allRuleIds = [
   'missing-field',
   'name-format',
+  'name-dir-mismatch',
   'description-too-long',
   'description-too-short',
   'weak-trigger',

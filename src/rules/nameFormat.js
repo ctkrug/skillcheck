@@ -32,7 +32,7 @@ export default {
     if (dir && dir !== name) {
       out.push(
         diag({
-          ruleId: 'name-format',
+          ruleId: 'name-dir-mismatch',
           severity: SEVERITY.WARNING,
           message: `skill name \`${name}\` does not match its directory \`${dir}\``,
           line: node.line,
