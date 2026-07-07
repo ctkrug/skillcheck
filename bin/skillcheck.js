@@ -2,7 +2,7 @@
 // Skillcheck CLI. Lints instruction files and exits non-zero when errors are
 // found, so it drops straight into CI or a pre-commit hook.
 
-import { lintPaths } from '../src/index.js';
+import { lintPaths, loadConfig, findConfig } from '../src/index.js';
 import { renderPretty } from '../src/reporters/pretty.js';
 import { renderJson } from '../src/reporters/json.js';
 
@@ -18,6 +18,8 @@ Arguments:
 Options:
   --json          emit machine-readable JSON instead of the text report
   --quiet         suppress output; rely on the exit code
+  --config <path> use this config file (default: ./skillcheck.json if present)
+  --no-config     ignore any skillcheck.json (run with default rule severities)
   -h, --help      show this help
   -v, --version   print the version
 
@@ -28,10 +30,16 @@ Exit codes:
 `;
 
 function parseArgs(argv) {
-  const opts = { json: false, quiet: false, paths: [] };
-  for (const arg of argv) {
+  const opts = { json: false, quiet: false, paths: [], config: undefined, noConfig: false };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
     if (arg === '--json') opts.json = true;
     else if (arg === '--quiet') opts.quiet = true;
+    else if (arg === '--no-config') opts.noConfig = true;
+    else if (arg === '--config') {
+      opts.config = argv[++i];
+      if (opts.config === undefined) opts.missingValue = '--config';
+    } else if (arg.startsWith('--config=')) opts.config = arg.slice('--config='.length);
     else if (arg === '-h' || arg === '--help') opts.help = true;
     else if (arg === '-v' || arg === '--version') opts.version = true;
     else if (arg.startsWith('-')) opts.unknown = arg;
@@ -55,14 +63,27 @@ function main() {
     process.stderr.write(`unknown option: ${opts.unknown}\n\n${HELP}`);
     return 2;
   }
+  if (opts.missingValue) {
+    process.stderr.write(`${opts.missingValue} requires a file path\n\n${HELP}`);
+    return 2;
+  }
   if (opts.paths.length === 0) {
     process.stderr.write(`no paths given\n\n${HELP}`);
     return 2;
   }
 
+  let config;
+  try {
+    const configPath = opts.noConfig ? null : opts.config || findConfig();
+    if (configPath) config = loadConfig(configPath);
+  } catch (err) {
+    process.stderr.write(`skillcheck: ${err.message}\n`);
+    return 2;
+  }
+
   let result;
   try {
-    result = lintPaths(opts.paths);
+    result = lintPaths(opts.paths, { config });
   } catch (err) {
     process.stderr.write(`skillcheck: ${err.message}\n`);
     return 2;
