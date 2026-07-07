@@ -32,20 +32,28 @@ the ones that cost you a debugging session because "the agent isn't picking up m
 skill" — are invisible until they bite. Modeling those failure modes correctly
 (not just "is this valid YAML") is the whole point.
 
-## What it checks (v1 scope)
+## What it checks
 
-- **Missing frontmatter fields** — a skill with no `name` or `description` never
-  loads; Skillcheck flags it as an error.
+- **Missing frontmatter fields** — a skill with no `name` or `description`, or an
+  unterminated `---` block, never loads; Skillcheck flags it as an error.
 - **Skill-name collisions** — two skills declaring the same `name` shadow each
   other; only one wins and it's non-deterministic.
+- **Duplicate / typo'd keys** — a repeated `name:` (YAML silently keeps one) or a
+  near-miss like `nmae:` that leaves the real field absent.
 - **Trigger quality** — a `description` with no "use when…" guidance won't
   reliably fire; Skillcheck warns.
 - **Naming rules** — `name` must be kebab-case and (for skills) match its
   directory, or the runtime can't resolve it.
-- **Length limits** — over-long descriptions get truncated by the model host.
+- **Length limits** — over-long descriptions get truncated by the model host;
+  measured across multi-line (`|` / `>`) descriptions.
+- **Dead skill references** — a `/skill-name` mention in prose that resolves to no
+  skill in the set.
 
-See [`docs/VISION.md`](docs/VISION.md) for the full problem framing and
-[`docs/BACKLOG.md`](docs/BACKLOG.md) for the roadmap.
+Every check is [configurable](docs/RULES.md#configuring-rules) via a
+`skillcheck.json` — disable a rule or change its severity. See the full
+[rule reference](docs/RULES.md), [`docs/VISION.md`](docs/VISION.md) for the
+problem framing, and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the
+codebase map.
 
 ## Two front-ends, one engine
 
@@ -62,10 +70,14 @@ the website never disagree about what's valid.
 git clone https://github.com/ctkrug/skillcheck
 cd skillcheck
 node bin/skillcheck.js examples        # lint the bundled examples
+node bin/skillcheck.js --init my-skill # scaffold a lint-clean starter skill
 npm test                               # run the test suite
 ```
 
 No dependencies to install — the engine is stdlib-only Node ESM.
+
+Handy flags: `--json` (machine-readable output), `--max-warnings <n>` (fail CI on
+warnings too), `--config <path>` / `--no-config`, `--init [name]`.
 
 ## Use it in CI
 
