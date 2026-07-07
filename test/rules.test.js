@@ -120,3 +120,28 @@ test('distinct names do not collide', () => {
   ]);
   assert.equal(result.diagnostics.filter((d) => d.ruleId === 'duplicate-name').length, 0);
 });
+
+function refSkill(name, body) {
+  return `---\nname: ${name}\ndescription: Use when the user needs ${name}.\n---\n\n${body}\n`;
+}
+
+test('a reference to an absent skill warns; a present one does not', () => {
+  const result = lintSources([
+    { path: 'a/SKILL.md', text: refSkill('alpha-tool', 'See /beta-tool and /does-not-exist.') },
+    { path: 'b/SKILL.md', text: refSkill('beta-tool', 'A sibling skill.') },
+  ]);
+  const refs = result.diagnostics.filter((d) => d.ruleId === 'unresolved-skill-reference');
+  assert.equal(refs.length, 1, 'only the unknown reference should warn');
+  assert.match(refs[0].message, /does-not-exist/);
+});
+
+test('the skill-reference rule stays quiet on a single document', () => {
+  const result = lintText(refSkill('alpha-tool', 'See /whatever-tool here.'), {
+    path: 'a/SKILL.md',
+  });
+  assert.equal(
+    result.diagnostics.filter((d) => d.ruleId === 'unresolved-skill-reference').length,
+    0,
+    'one file has no context to resolve references',
+  );
+});
