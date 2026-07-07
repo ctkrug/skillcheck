@@ -35,9 +35,9 @@ the same engine that runs in CI.
   - AC2: Switching between files preserves each file's content. ✅
 
 - [x] **1.4 — Static build + relative paths.** `npm run build` emits a
-  self-contained site to `dist/` using only relative asset paths.
-  - AC1: `npm run build` produces `dist/index.html` plus assets and a copied
-    engine; opening `dist/index.html` works with no server. ✅
+  self-contained site to `site/` using only relative asset paths.
+  - AC1: `npm run build` produces `site/index.html` plus assets and a copied
+    engine; opening `site/index.html` works with no server. ✅
   - AC2: No asset URL begins with `/` (deployable under a subpath). ✅
 
 - [x] **1.5 — Design polish (per D1–D4).** Execute `docs/DESIGN.md`: blueprint

@@ -36,7 +36,7 @@ src/
     pretty.js            Node-only: colorized terminal report
     json.js              machine-readable JSON report
 web/                     the validator front-end (index.html, styles.css, app.js)
-scripts/build-site.js    copies web/ + the pure engine into dist/ (auto-discovered)
+scripts/build-site.js    copies web/ + the pure engine into site/ (auto-discovered)
 examples/                seeded fixtures the CLI and tests lint
 test/                    node:test suites (parser, rules, config, cli, scaffold)
                          + properties.test.js: seeded property/fuzz suite
@@ -72,12 +72,13 @@ build picks it up automatically (see below).
 
 ## The web build
 
-`scripts/build-site.js` copies `web/` into `dist/` and mirrors the pure engine
-into `dist/engine/`, preserving the relative import structure. It **walks
+`scripts/build-site.js` copies `web/` into `site/` and mirrors the pure engine
+into `site/engine/`, preserving the relative import structure. It **walks
 `src/` and copies every `.js` except the Node-only modules** (`index.js`,
-`scaffold.js`, `reporters/`) — so a new rule ships to the browser with no build
+`scaffold.js`, `reporters/`), so a new rule ships to the browser with no build
 edit. Every asset path is relative, so the site deploys under a subpath
-(`apps.charliekrug.com/skillcheck/`).
+(`apps.charliekrug.com/skillcheck/`). The built `site/` is committed so it serves
+as plain static files.
 
 The web app (`web/app.js`) imports `./engine/lint.js` and calls the same
 `lintSources`. It silences `name-dir-mismatch` (pasted content has no real
@@ -90,5 +91,5 @@ the cross-file rules fire live.
 node bin/skillcheck.js examples     # lint the bundled fixtures
 node bin/skillcheck.js --init demo  # scaffold a lint-clean starter skill
 npm test                            # node:test suites (no network/box needed)
-npm run build                       # emit the static site into dist/
+npm run build                       # emit the static site into site/
 ```

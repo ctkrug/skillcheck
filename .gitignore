@@ -4,7 +4,7 @@ package-lock.json
 npm-debug.log*
 yarn-error.log*
 
-# Build output
+# Build artifacts (the deployable site/ is committed, not ignored)
 dist/
 *.tgz
 
