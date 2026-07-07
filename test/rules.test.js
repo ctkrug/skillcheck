@@ -30,12 +30,13 @@ test('a non-kebab name is an error', () => {
   assert.equal(nameDiag.severity, 'error');
 });
 
-test('a name/directory mismatch is a warning', () => {
+test('a name/directory mismatch is its own warning', () => {
   const result = lintText(skill({ name: 'demo-skill' }), { path: 'other-dir/SKILL.md' });
-  const mismatch = result.diagnostics.find(
-    (d) => d.ruleId === 'name-format' && d.severity === 'warning',
-  );
-  assert.ok(mismatch, 'expected a name/directory mismatch warning');
+  const mismatch = result.diagnostics.find((d) => d.ruleId === 'name-dir-mismatch');
+  assert.ok(mismatch, 'expected a name-dir-mismatch warning');
+  assert.equal(mismatch.severity, 'warning');
+  // The kebab-case check is separate and should not fire for a valid name.
+  assert.ok(!ids(result).includes('name-format'));
 });
 
 test('a description with no trigger language warns', () => {
