@@ -65,11 +65,11 @@ toy subset.
   - AC1: A description written across 3 indented lines is parsed as one string. ✅
   - AC2: Its length is measured across all lines (over-long is detected). ✅
 
-- [ ] **2.3 — Unresolved skill-reference rule.** Flag `/skill-name` mentions in a
+- [x] **2.3 — Unresolved skill-reference rule.** Flag `/skill-name` mentions in a
   description/body that resolve to no known skill in the linted set.
   - AC1: A description referencing `/does-not-exist` warns; one referencing a
-    present skill does not.
-  - AC2: The rule only runs when more than one document is linted (needs context).
+    present skill does not. ✅
+  - AC2: The rule only runs when more than one document is linted (needs context). ✅
 
 - [x] **2.4 — Reserved / duplicate-key rules.** Detect duplicate frontmatter keys
   and unknown top-level keys for skills.
