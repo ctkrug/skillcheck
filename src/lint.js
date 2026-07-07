@@ -4,6 +4,7 @@
 import { parseDocument } from './parser.js';
 import { documentRules, projectRules } from './rules/index.js';
 import { sortDiagnostics, summarize } from './diagnostics.js';
+import { normalizeConfig, applyConfig } from './config.js';
 
 /**
  * @typedef {Object} Source
@@ -24,20 +25,22 @@ import { sortDiagnostics, summarize } from './diagnostics.js';
  * Lint one document's text and return its diagnostics. Convenience wrapper around
  * {@link lintSources} for the common single-file / paste case.
  * @param {string} text
- * @param {{path?: string, kind?: string}} [opts]
+ * @param {{path?: string, kind?: string, config?: object}} [opts]
  * @returns {LintResult}
  */
 export function lintText(text, opts = {}) {
-  return lintSources([{ text, path: opts.path, kind: opts.kind }]);
+  return lintSources([{ text, path: opts.path, kind: opts.kind }], { config: opts.config });
 }
 
 /**
  * Lint a set of already-loaded sources. This is the single code path both the CLI
  * (after reading files) and the web validator use.
  * @param {Source[]} sources
+ * @param {{config?: object}} [options]   optional rule config (disable / re-severity)
  * @returns {LintResult}
  */
-export function lintSources(sources) {
+export function lintSources(sources, options = {}) {
+  const config = normalizeConfig(options.config);
   const documents = sources.map((s) =>
     parseDocument(s.text, { path: s.path, kind: s.kind }),
   );
@@ -62,7 +65,8 @@ export function lintSources(sources) {
     }
   }
 
-  const sorted = sortDiagnostics(diagnostics);
+  const configured = applyConfig(diagnostics, config);
+  const sorted = sortDiagnostics(configured);
   const summary = summarize(sorted);
   return { diagnostics: sorted, summary, documents, ok: summary.errors === 0 };
 }
