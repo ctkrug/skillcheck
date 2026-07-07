@@ -81,6 +81,23 @@ test('an unknown flag is a usage error (exit 2)', () => {
   assert.match(r.stderr, /unknown option/);
 });
 
+test('--init scaffolds a skill that then lints clean', () => {
+  const root = mkdtempSync(join(tmpdir(), 'skillcheck-'));
+  try {
+    const created = run(['--init', 'demo-tool'], root);
+    assert.equal(created.status, 0);
+    assert.match(created.stdout, /created/);
+    // The freshly scaffolded skill passes every rule.
+    const linted = run(['demo-tool'], root);
+    assert.equal(linted.status, 0);
+    assert.match(linted.stdout, /no problems/);
+    // A second init refuses to overwrite.
+    assert.equal(run(['--init', 'demo-tool'], root).status, 2);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('--help and --version exit 0', () => {
   assert.equal(run(['--help']).status, 0);
   const v = run(['--version']);
