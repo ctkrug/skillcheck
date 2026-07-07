@@ -166,11 +166,18 @@ function parseFrontmatter(lines) {
       continue;
     }
 
-    // A bare `key:` opens a nested map (e.g. metadata:).
+    // A bare `key:` opens a nested map (e.g. metadata:). If the key is a
+    // duplicate, setField keeps the first occurrence and does NOT create a map,
+    // so we must not switch into map mode — otherwise the next indented line
+    // would write into an undefined map and throw.
     if (rest.trim() === '') {
       const node = { key, value: '', raw: '', line: i + 1, column: indent + 1 };
-      if (setField(key, node)) fm.maps[key] = {};
-      currentMap = key;
+      if (setField(key, node)) {
+        fm.maps[key] = {};
+        currentMap = key;
+      } else {
+        currentMap = null;
+      }
       continue;
     }
 
