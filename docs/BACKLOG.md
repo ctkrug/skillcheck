@@ -92,9 +92,9 @@ Make it pleasant to run locally and trivial to gate a repo on.
   - AC1: `--json` emits valid JSON with `ok`, `summary`, `diagnostics`. ✅
   - AC2: Errors exit 1; a clean run exits 0. ✅
 
-- [ ] **3.2 — `--max-warnings` and severity gating.** Let CI fail on warnings too.
-  - AC1: `--max-warnings 0` exits non-zero when warnings exist.
-  - AC2: Default behavior (warnings allowed) is unchanged.
+- [x] **3.2 — `--max-warnings` and severity gating.** Let CI fail on warnings too.
+  - AC1: `--max-warnings 0` exits non-zero when warnings exist. ✅
+  - AC2: Default behavior (warnings allowed) is unchanged. ✅
 
 - [ ] **3.3 — Ready-to-copy CI + pre-commit recipes.** Document a GitHub Action
   step and a pre-commit hook using the CLI.
