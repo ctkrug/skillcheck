@@ -55,3 +55,44 @@ test('normalizes CRLF line endings', () => {
   assert.equal(doc.frontmatter.fields.name.value, 'foo');
   assert.equal(doc.frontmatter.closed, true);
 });
+
+test('parses a block scalar (|) preserving newlines', () => {
+  const doc = parseDocument(
+    '---\nname: foo\ndescription: |\n  line one\n  line two\n  line three\n---\n',
+  );
+  assert.equal(doc.frontmatter.fields.description.value, 'line one\nline two\nline three');
+});
+
+test('parses a folded scalar (>) joining lines with spaces', () => {
+  const doc = parseDocument(
+    '---\nname: foo\ndescription: >\n  use when the user\n  wants one string\n---\n',
+  );
+  assert.equal(doc.frontmatter.fields.description.value, 'use when the user wants one string');
+});
+
+test('folds a plain scalar across indented continuation lines', () => {
+  const doc = parseDocument(
+    '---\nname: foo\ndescription: use when the user asks\n  and it keeps going\n  onto a third line\n---\n',
+  );
+  assert.equal(
+    doc.frontmatter.fields.description.value,
+    'use when the user asks and it keeps going onto a third line',
+  );
+});
+
+test('a block scalar does not swallow the following top-level key', () => {
+  const doc = parseDocument(
+    '---\nname: foo\ndescription: |\n  multi\n  line\nmetadata:\n  type: reference\n---\n',
+  );
+  assert.equal(doc.frontmatter.fields.description.value, 'multi\nline');
+  assert.equal(doc.frontmatter.maps.metadata.type.value, 'reference');
+});
+
+test('records a repeated top-level key as a duplicate, keeping the first', () => {
+  const doc = parseDocument('---\nname: first\nname: second\ndescription: x\n---\n');
+  assert.equal(doc.frontmatter.fields.name.value, 'first');
+  assert.equal(doc.frontmatter.duplicates.length, 1);
+  assert.equal(doc.frontmatter.duplicates[0].key, 'name');
+  assert.equal(doc.frontmatter.duplicates[0].line, 3);
+  assert.equal(doc.frontmatter.duplicates[0].firstLine, 2);
+});
