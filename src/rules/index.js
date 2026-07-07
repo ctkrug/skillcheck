@@ -26,6 +26,7 @@ import descriptionQuality from './descriptionQuality.js';
 import duplicateKey from './duplicateKey.js';
 import unknownKey from './unknownKey.js';
 import nameCollision from './nameCollision.js';
+import skillReference from './skillReference.js';
 
 export const documentRules = [
   missingFrontmatter,
@@ -35,7 +36,7 @@ export const documentRules = [
   unknownKey,
 ];
 
-export const projectRules = [nameCollision];
+export const projectRules = [nameCollision, skillReference];
 
 /** Every rule id Skillcheck can emit — handy for docs, tests, and config. */
 export const allRuleIds = [
@@ -47,4 +48,5 @@ export const allRuleIds = [
   'duplicate-key',
   'unknown-key',
   'duplicate-name',
+  'unresolved-skill-reference',
 ];
