@@ -6,24 +6,36 @@
 // relative paths so the site can be served from any subpath.
 
 import { mkdirSync, copyFileSync, readdirSync, rmSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
 
-// Pure, browser-safe engine files (index.js and reporters are Node-only).
-const ENGINE_FILES = [
-  'diagnostics.js',
-  'parser.js',
-  'lint.js',
-  'rules/index.js',
-  'rules/helpers.js',
-  'rules/missingFrontmatter.js',
-  'rules/nameFormat.js',
-  'rules/descriptionQuality.js',
-  'rules/nameCollision.js',
-];
+// Node-only engine modules the browser must never receive (they import node:fs).
+// Everything else under src/ is pure and browser-safe, so we auto-discover it —
+// that way a new rule module is copied automatically and can't be forgotten.
+const NODE_ONLY = new Set(['index.js', 'scaffold.js']);
+
+/** Recursively list every .js file under src/, relative to src/. */
+function engineFiles() {
+  const srcRoot = join(root, 'src');
+  const out = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === 'reporters') continue; // Node-only renderers
+        walk(abs);
+      } else if (entry.name.endsWith('.js')) {
+        const rel = relative(srcRoot, abs);
+        if (!NODE_ONLY.has(rel)) out.push(rel);
+      }
+    }
+  };
+  walk(srcRoot);
+  return out;
+}
 
 function copyInto(srcDir, destDir) {
   mkdirSync(destDir, { recursive: true });
@@ -41,14 +53,15 @@ function build() {
   copyInto(join(root, 'web'), dist);
 
   // Engine, under dist/engine/ mirroring src/ so relative imports resolve.
-  for (const rel of ENGINE_FILES) {
+  const files = engineFiles();
+  for (const rel of files) {
     const from = join(root, 'src', rel);
     const to = join(dist, 'engine', rel);
     mkdirSync(dirname(to), { recursive: true });
     copyFileSync(from, to);
   }
 
-  process.stdout.write(`built dist/ (${ENGINE_FILES.length} engine modules)\n`);
+  process.stdout.write(`built dist/ (${files.length} engine modules)\n`);
 }
 
 build();
