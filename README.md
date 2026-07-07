@@ -67,6 +67,40 @@ npm test                               # run the test suite
 
 No dependencies to install — the engine is stdlib-only Node ESM.
 
+## Use it in CI
+
+Gate every merge on a valid skill set. Add this step to a GitHub Actions
+workflow — it fails the job the moment a skill breaks:
+
+```yaml
+- name: Lint agent instruction files
+  run: npx skillcheck .claude/skills
+```
+
+Fail on warnings too (e.g. weak triggers), not just errors:
+
+```yaml
+- run: npx skillcheck --max-warnings 0 .claude/skills
+```
+
+### Pre-commit hook
+
+Catch problems before they land. Save this as `.git/hooks/pre-commit` (and
+`chmod +x` it), or wire the command into your pre-commit framework of choice:
+
+```bash
+#!/bin/sh
+# Block a commit that breaks any agent instruction file.
+npx skillcheck .claude/skills || {
+  echo "skillcheck found problems — fix them or commit with --no-verify" >&2
+  exit 1
+}
+```
+
+Point it at whatever directory holds your `SKILL.md` / `CLAUDE.md` /
+`AGENTS.md` files. Drop a [`skillcheck.json`](docs/RULES.md#configuring-rules)
+beside it to tune which rules gate.
+
 ## Stack
 
 - **Engine:** plain ES-module JavaScript, zero runtime dependencies (so it runs
