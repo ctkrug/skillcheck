@@ -2,13 +2,36 @@
 // lint.js. The browser never imports this file (it would pull in node:fs); it
 // imports lint.js directly.
 
-import { readFileSync, statSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, statSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { lintSources, lintText } from './lint.js';
+import { skillTemplate } from './scaffold.js';
 
 export { lintText, lintSources };
 export { SEVERITY } from './diagnostics.js';
 export { allRuleIds } from './rules/index.js';
+export { skillTemplate } from './scaffold.js';
+
+/**
+ * Scaffold a starter skill at `<cwd>/<name>/SKILL.md`. Writing into a directory
+ * named after the skill keeps the template lint-clean (name matches directory).
+ * Refuses to overwrite an existing file.
+ * @param {string} name  kebab-case skill name
+ * @param {{cwd?: string}} [opts]
+ * @returns {string} the path written
+ */
+export function initSkill(name, opts = {}) {
+  const cwd = opts.cwd || process.cwd();
+  const dir = join(cwd, name);
+  const file = join(dir, 'SKILL.md');
+  if (existsSync(file)) {
+    throw new Error(`${file} already exists — refusing to overwrite`);
+  }
+  const contents = skillTemplate(name); // throws if name is not kebab-case
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(file, contents);
+  return file;
+}
 
 const CONFIG_FILENAME = 'skillcheck.json';
 
