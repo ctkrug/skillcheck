@@ -69,6 +69,18 @@ test('--max-warnings 0 exits non-zero when only warnings exist', () => {
   }
 });
 
+test('--max-warnings with no value is a usage error (exit 2)', () => {
+  const { root, dir } = skillDir('weak-trig', WARN_ONLY);
+  try {
+    // Trailing flag with nothing after it must not be silently ignored.
+    const r = run([dir, '--max-warnings']);
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /max-warnings/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('no paths is a usage error (exit 2)', () => {
   const r = run([]);
   assert.equal(r.status, 2);

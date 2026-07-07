@@ -54,9 +54,12 @@ function parseArgs(argv) {
     } else if (arg.startsWith('--config=')) opts.config = arg.slice('--config='.length);
     else if (arg === '--max-warnings' || arg.startsWith('--max-warnings=')) {
       const raw = arg.includes('=') ? arg.slice('--max-warnings='.length) : argv[++i];
-      const n = Number(raw);
-      if (raw === undefined || !Number.isInteger(n) || n < 0) opts.badMaxWarnings = raw;
-      else opts.maxWarnings = n;
+      if (raw === undefined) opts.missingValue = '--max-warnings';
+      else {
+        const n = Number(raw);
+        if (!Number.isInteger(n) || n < 0) opts.badMaxWarnings = raw;
+        else opts.maxWarnings = n;
+      }
     } else if (arg === '-h' || arg === '--help') opts.help = true;
     else if (arg === '-v' || arg === '--version') opts.version = true;
     else if (arg.startsWith('-')) opts.unknown = arg;
@@ -81,7 +84,7 @@ function main() {
     return 2;
   }
   if (opts.missingValue) {
-    process.stderr.write(`${opts.missingValue} requires a file path\n\n${HELP}`);
+    process.stderr.write(`${opts.missingValue} requires a value\n\n${HELP}`);
     return 2;
   }
   if (opts.badMaxWarnings !== undefined) {
