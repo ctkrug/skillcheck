@@ -2,13 +2,41 @@
 // lint.js. The browser never imports this file (it would pull in node:fs); it
 // imports lint.js directly.
 
-import { readFileSync, statSync, readdirSync } from 'node:fs';
+import { readFileSync, statSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { lintSources, lintText } from './lint.js';
 
 export { lintText, lintSources };
 export { SEVERITY } from './diagnostics.js';
 export { allRuleIds } from './rules/index.js';
+
+const CONFIG_FILENAME = 'skillcheck.json';
+
+/**
+ * Read and JSON-parse a config file. Throws a clear error if the file is missing
+ * or malformed — an unreadable config should stop the run, not be ignored.
+ * @param {string} path
+ * @returns {object}
+ */
+export function loadConfig(path) {
+  let text;
+  try {
+    text = readFileSync(path, 'utf8');
+  } catch {
+    throw new Error(`config file not found: ${path}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`config file ${path} is not valid JSON: ${err.message}`);
+  }
+}
+
+/** Look for a `skillcheck.json` in `dir` and return its path, or null. */
+export function findConfig(dir = process.cwd()) {
+  const candidate = join(dir, CONFIG_FILENAME);
+  return existsSync(candidate) ? candidate : null;
+}
 
 // Filenames Skillcheck recognizes as instruction files when walking a directory.
 const TARGET_FILES = new Set(['SKILL.md', 'CLAUDE.md', 'AGENTS.md']);
@@ -35,9 +63,10 @@ export function collectTargets(root) {
  * Lint one or more paths (files or directories). Directories are walked for
  * known instruction files.
  * @param {string[]} paths
+ * @param {{config?: object}} [options]
  * @returns {import('./lint.js').LintResult}
  */
-export function lintPaths(paths) {
+export function lintPaths(paths, options = {}) {
   const files = [];
   for (const p of paths) {
     const st = statSync(p);
@@ -45,5 +74,5 @@ export function lintPaths(paths) {
     else files.push(p);
   }
   const sources = files.map((path) => ({ path, text: readFileSync(path, 'utf8') }));
-  return lintSources(sources);
+  return lintSources(sources, options);
 }
