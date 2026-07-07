@@ -40,6 +40,14 @@ test('an unknown rule id in config throws a clear error', () => {
   );
 });
 
+test('a non-object `rules` value throws a clear error', () => {
+  // A malformed skillcheck.json (`{"rules": "everything"}`) must fail loudly.
+  assert.throws(
+    () => normalizeConfig({ rules: 'everything' }),
+    /`rules` must be an object/,
+  );
+});
+
 test('an invalid severity value throws', () => {
   assert.throws(
     () => normalizeConfig({ rules: { 'weak-trigger': 'loud' } }),
