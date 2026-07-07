@@ -110,6 +110,43 @@ test('--init scaffolds a skill that then lints clean', () => {
   }
 });
 
+test('a missing --config file is a usage error (exit 2)', () => {
+  const { root, dir } = skillDir('weak-trig', WARN_ONLY);
+  try {
+    const r = run([dir, '--config', join(root, 'nope.json')]);
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /config file not found/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a malformed --config JSON file is a usage error (exit 2)', () => {
+  const { root, dir } = skillDir('weak-trig', WARN_ONLY);
+  try {
+    const cfg = join(root, 'bad.json');
+    writeFileSync(cfg, '{ not valid json');
+    const r = run([dir, '--config', cfg]);
+    assert.equal(r.status, 2);
+    assert.match(r.stderr, /not valid JSON/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('an auto-discovered skillcheck.json in cwd applies, and --no-config ignores it', () => {
+  const { root, dir } = skillDir('weak-trig', WARN_ONLY);
+  try {
+    // A config in the working directory that turns the lone warning off.
+    writeFileSync(join(root, 'skillcheck.json'), '{"rules":{"weak-trigger":"off"}}');
+    // Run with cwd = root so findConfig() discovers it; gate on warnings.
+    assert.equal(run(['weak-trig', '--max-warnings', '0', '--quiet'], root).status, 0, 'config suppresses the warning');
+    assert.equal(run(['weak-trig', '--max-warnings', '0', '--quiet', '--no-config'], root).status, 1, '--no-config restores it');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('--help and --version exit 0', () => {
   assert.equal(run(['--help']).status, 0);
   const v = run(['--version']);
