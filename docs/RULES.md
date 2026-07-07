@@ -11,6 +11,8 @@ you override per rule.
 | `weak-trigger` | warning | skill | `description` has no "use when…" trigger language, so it won't reliably fire. |
 | `description-too-long` | warning | skill | `description` exceeds 1024 chars and risks host truncation. |
 | `description-too-short` | warning | skill | `description` under 16 chars — too terse to match a request against. |
+| `duplicate-key` | error | skill | A top-level frontmatter key appears twice; YAML silently keeps only one. |
+| `unknown-key` | warning | skill | A top-level key is a near-miss typo of a known key (e.g. `nmae:` → `name:`). |
 | `duplicate-name` | error | project | Two skills declare the same `name` and shadow each other non-deterministically. |
 
 ## Why these, specifically
