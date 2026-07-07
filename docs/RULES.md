@@ -14,6 +14,7 @@ you override per rule.
 | `duplicate-key` | error | skill | A top-level frontmatter key appears twice; YAML silently keeps only one. |
 | `unknown-key` | warning | skill | A top-level key is a near-miss typo of a known key (e.g. `nmae:` → `name:`). |
 | `duplicate-name` | error | project | Two skills declare the same `name` and shadow each other non-deterministically. |
+| `unresolved-skill-reference` | warning | project | A `/skill-name` mention resolves to no skill in the linted set (needs 2+ files). |
 
 ## Why these, specifically
 
