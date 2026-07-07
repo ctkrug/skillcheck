@@ -1,6 +1,6 @@
 {
   "name": "skillcheck",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A linter and web validator for AI-agent instruction files (CLAUDE.md, AGENTS.md, skill frontmatter).",
   "type": "module",
   "bin": {
