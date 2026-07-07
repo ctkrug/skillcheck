@@ -97,6 +97,12 @@ test('records a repeated top-level key as a duplicate, keeping the first', () =>
   assert.equal(doc.frontmatter.duplicates[0].firstLine, 2);
 });
 
+test('ignores a non-key line inside frontmatter and keeps parsing after it', () => {
+  const doc = parseDocument('---\nname: foo\njust some prose without a colon\ndescription: bar\n---\n');
+  assert.equal(doc.frontmatter.fields.name.value, 'foo');
+  assert.equal(doc.frontmatter.fields.description.value, 'bar');
+});
+
 test('does not throw when a duplicate key re-opens as a nested map', () => {
   // A scalar key repeated as a bare map header (`name:` then indented children)
   // must not crash: the parser contract is never-throw on malformed input.
