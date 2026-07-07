@@ -122,6 +122,11 @@ body {
 /* ---- Sheet (the drafting table) ---- */
 .sheet {
   flex: 1;
+  /* Floor the hero at ~a full screen below the masthead. Without this, the
+     below-the-fold reference copy makes the page taller than the viewport, and
+     a flex-basis:0 item with overflow:hidden would shrink to nothing instead of
+     growing. The min-height keeps the drafting table filling the first screen. */
+  min-height: calc(100vh - 150px);
   margin: 8px clamp(12px, 4vw, 48px) 24px;
   border: 1.5px solid var(--ink);
   border-radius: var(--r-card);
