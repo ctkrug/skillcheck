@@ -39,6 +39,7 @@ web/                     the validator front-end (index.html, styles.css, app.js
 scripts/build-site.js    copies web/ + the pure engine into dist/ (auto-discovered)
 examples/                seeded fixtures the CLI and tests lint
 test/                    node:test suites (parser, rules, config, cli, scaffold)
+                         + properties.test.js: seeded property/fuzz suite
 docs/                    VISION · DESIGN · BACKLOG · RULES · this file
 ```
 
