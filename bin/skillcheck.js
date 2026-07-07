@@ -2,9 +2,18 @@
 // Skillcheck CLI. Lints instruction files and exits non-zero when errors are
 // found, so it drops straight into CI or a pre-commit hook.
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { lintPaths, loadConfig, findConfig, initSkill } from '../src/index.js';
 import { renderPretty } from '../src/reporters/pretty.js';
 import { renderJson } from '../src/reporters/json.js';
+
+// Single source of truth for the version: read it from package.json (always
+// shipped in the npm tarball) so `--version` can never drift from the release.
+const { version } = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'package.json'), 'utf8'),
+);
 
 const HELP = `skillcheck — lint AI-agent instruction files
 
@@ -76,7 +85,7 @@ function main() {
     return 0;
   }
   if (opts.version) {
-    process.stdout.write('skillcheck 0.1.0\n');
+    process.stdout.write(`skillcheck ${version}\n`);
     return 0;
   }
   if (opts.unknown) {
