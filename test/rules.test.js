@@ -84,6 +84,35 @@ test('duplicate skill names collide across files', () => {
   assert.equal(dups.every((d) => d.severity === 'error'), true);
 });
 
+test('a duplicate frontmatter key is an error on the second occurrence', () => {
+  const text = '---\nname: first-name\nname: second-name\ndescription: Use when needed here.\n---\n\nbody\n';
+  const result = lintText(text, { path: 'first-name/SKILL.md' });
+  const dup = result.diagnostics.find((d) => d.ruleId === 'duplicate-key');
+  assert.ok(dup, 'expected a duplicate-key diagnostic');
+  assert.equal(dup.severity, 'error');
+  assert.equal(dup.line, 3, 'should flag the second occurrence');
+});
+
+test('a unique set of keys produces no duplicate-key diagnostic', () => {
+  const result = lintText(skill(), { path: 'demo-skill/SKILL.md' });
+  assert.ok(!ids(result).includes('duplicate-key'));
+});
+
+test('a typo of a known key warns with a suggestion', () => {
+  const text = '---\nname: demo-skill\nnmae: oops\ndescription: Use when needed here.\n---\n\nbody\n';
+  const result = lintText(text, { path: 'demo-skill/SKILL.md' });
+  const unknown = result.diagnostics.find((d) => d.ruleId === 'unknown-key');
+  assert.ok(unknown, 'expected an unknown-key diagnostic');
+  assert.match(unknown.message, /did you mean `name`/);
+});
+
+test('a genuinely custom key does not warn as unknown', () => {
+  const text =
+    '---\nname: demo-skill\ndescription: Use when needed here.\nquarterly-owner: platform\n---\n\nbody\n';
+  const result = lintText(text, { path: 'demo-skill/SKILL.md' });
+  assert.ok(!ids(result).includes('unknown-key'));
+});
+
 test('distinct names do not collide', () => {
   const result = lintSources([
     { path: 'a/SKILL.md', text: skill({ name: 'alpha-skill' }) },
