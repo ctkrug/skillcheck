@@ -59,11 +59,11 @@ toy subset.
   - AC1: `npm test` passes with a rule test per check. ✅
   - AC2: `node bin/skillcheck.js examples` reports the seeded problems. ✅
 
-- [ ] **2.2 — Multi-line description parsing.** Support YAML folded/block scalars
+- [x] **2.2 — Multi-line description parsing.** Support YAML folded/block scalars
   (`>` / `|` and indented continuations) so length/trigger checks see the whole
   description.
-  - AC1: A description written across 3 indented lines is parsed as one string.
-  - AC2: Its length is measured across all lines (over-long is detected).
+  - AC1: A description written across 3 indented lines is parsed as one string. ✅
+  - AC2: Its length is measured across all lines (over-long is detected). ✅
 
 - [ ] **2.3 — Unresolved skill-reference rule.** Flag `/skill-name` mentions in a
   description/body that resolve to no known skill in the linted set.
