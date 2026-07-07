@@ -48,6 +48,23 @@ test('a null-valued description does not double-report', () => {
   assert.ok(!ids(result).includes('weak-trigger'));
 });
 
+test('a skill file with no frontmatter at all is a missing-field error', () => {
+  const result = lintText('# Just prose\n\nNo frontmatter block here.\n', { kind: 'skill' });
+  const miss = result.diagnostics.filter((d) => d.ruleId === 'missing-field');
+  assert.equal(miss.length, 1);
+  assert.match(miss[0].message, /no `---` frontmatter/);
+  assert.equal(result.ok, false);
+});
+
+test('a non-empty but too-short description warns', () => {
+  const result = lintText(skill({ description: 'hi' }), { path: 'demo-skill/SKILL.md' });
+  const short = result.diagnostics.find((d) => d.ruleId === 'description-too-short');
+  assert.ok(short, 'expected a description-too-short warning');
+  assert.equal(short.severity, 'warning');
+  // Too-short short-circuits the trigger check — don't also warn weak-trigger.
+  assert.ok(!ids(result).includes('weak-trigger'));
+});
+
 test('a non-kebab name is an error', () => {
   const result = lintText(skill({ name: 'Bad_Name' }), { path: 'Bad_Name/SKILL.md' });
   assert.ok(ids(result).includes('name-format'));
