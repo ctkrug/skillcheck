@@ -51,6 +51,22 @@ test('an over-long description warns', () => {
   assert.ok(ids(result).includes('description-too-long'));
 });
 
+test('description length is measured across multi-line block scalars', () => {
+  // Each line is comfortably short on its own; only the joined length is over.
+  const line = 'x'.repeat(80);
+  const body = Array.from({ length: 15 }, () => `  ${line}`).join('\n');
+  const text = `---\nname: demo-skill\ndescription: |\n${body}\n---\n\nbody\n`;
+  const result = lintText(text, { path: 'demo-skill/SKILL.md' });
+  assert.ok(ids(result).includes('description-too-long'));
+});
+
+test('a multi-line description with trigger language does not warn weak-trigger', () => {
+  const text =
+    '---\nname: demo-skill\ndescription: >\n  Formats numbers into strings.\n  Use when the user asks to render money.\n---\n\nbody\n';
+  const result = lintText(text, { path: 'demo-skill/SKILL.md' });
+  assert.ok(!ids(result).includes('weak-trigger'));
+});
+
 test('an unterminated frontmatter block is an error', () => {
   const result = lintText('---\nname: demo-skill\ndescription: Use when needed here.\n', {
     path: 'demo-skill/SKILL.md',
