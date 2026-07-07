@@ -7,7 +7,8 @@ Severity is the default; a `skillcheck.json` config lets you override per rule
 | Rule ID | Default | Applies to | What it catches |
 | --- | --- | --- | --- |
 | `missing-field` | error | skill | No `name`/`description`, or an unterminated `---` block. The skill never loads. |
-| `name-format` | error / warn | skill | `name` isn't kebab-case (error); `name` doesn't match its directory (warning). |
+| `name-format` | error | skill | `name` isn't kebab-case, so the runtime can't resolve it. |
+| `name-dir-mismatch` | warning | skill | `name` doesn't match the directory the `SKILL.md` lives in. |
 | `weak-trigger` | warning | skill | `description` has no "use when…" trigger language, so it won't reliably fire. |
 | `description-too-long` | warning | skill | `description` exceeds 1024 chars and risks host truncation. |
 | `description-too-short` | warning | skill | `description` under 16 chars — too terse to match a request against. |
