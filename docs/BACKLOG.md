@@ -76,10 +76,10 @@ toy subset.
   - AC1: A frontmatter with two `name:` lines errors on the second. ✅
   - AC2: An unknown key like `nmae:` (typo of a required key) warns with a hint. ✅
 
-- [ ] **2.5 — Config + rule toggles.** A `skillcheck.json` (or flags) to disable
+- [x] **2.5 — Config + rule toggles.** A `skillcheck.json` (or flags) to disable
   rules or set severity.
-  - AC1: Disabling `weak-trigger` suppresses only that rule.
-  - AC2: An unknown rule id in config produces a clear error, not a crash.
+  - AC1: Disabling `weak-trigger` suppresses only that rule. ✅
+  - AC2: An unknown rule id in config produces a clear error, not a crash. ✅
 
 ---
 
