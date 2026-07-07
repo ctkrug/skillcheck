@@ -1,4 +1,5 @@
 import { diag, SEVERITY } from '../diagnostics.js';
+import { isBlankValue } from './helpers.js';
 
 // Instruction files often refer to other skills by their slash-name ("delegate
 // to /deep-research"). If that name resolves to no skill in the linted set, the
@@ -18,7 +19,7 @@ function declaredNames(docs) {
   for (const doc of docs) {
     if (doc.kind !== 'skill') continue;
     const node = doc.frontmatter.fields.name;
-    if (node && node.raw !== '') names.add(String(node.value));
+    if (!isBlankValue(node)) names.add(String(node.value));
   }
   return names;
 }

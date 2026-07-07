@@ -1,4 +1,5 @@
 import { diag, SEVERITY } from '../diagnostics.js';
+import { isBlankValue } from './helpers.js';
 
 // Required frontmatter keys per document kind. A skill with no `name` never
 // registers; with no `description` the model has nothing to match a request
@@ -44,7 +45,7 @@ export default {
 
     for (const key of REQUIRED[doc.kind] || []) {
       const node = frontmatter.fields[key];
-      if (!node || node.raw === '') {
+      if (isBlankValue(node)) {
         out.push(
           diag({
             ruleId: 'missing-field',

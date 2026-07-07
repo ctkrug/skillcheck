@@ -1,5 +1,5 @@
 import { diag, SEVERITY } from '../diagnostics.js';
-import { isKebabCase, skillDirName } from './helpers.js';
+import { isKebabCase, skillDirName, isBlankValue } from './helpers.js';
 
 // The runtime resolves a skill by its `name`, which must be kebab-case and — for
 // on-disk skills — match the directory it lives in. A mismatch means the skill
@@ -11,7 +11,7 @@ export default {
   check(doc) {
     const out = [];
     const node = doc.frontmatter.fields.name;
-    if (!node || node.raw === '') return out; // missing-field owns this case
+    if (isBlankValue(node)) return out; // missing-field owns the empty/null case
 
     const name = String(node.value);
 

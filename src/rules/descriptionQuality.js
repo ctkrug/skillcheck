@@ -1,5 +1,5 @@
 import { diag, SEVERITY } from '../diagnostics.js';
-import { hasTriggerLanguage } from './helpers.js';
+import { hasTriggerLanguage, isBlankValue } from './helpers.js';
 
 // Model hosts truncate very long skill descriptions, and a description with no
 // "use when…" trigger language won't reliably fire. Both are the classic "my
@@ -14,7 +14,7 @@ export default {
   check(doc) {
     const out = [];
     const node = doc.frontmatter.fields.description;
-    if (!node || node.raw === '') return out; // missing-field owns this case
+    if (isBlankValue(node)) return out; // missing-field owns the empty/null case
 
     const desc = String(node.value);
 

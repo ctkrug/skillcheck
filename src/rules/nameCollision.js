@@ -1,4 +1,5 @@
 import { diag, SEVERITY } from '../diagnostics.js';
+import { isBlankValue } from './helpers.js';
 
 // A project-level rule: it needs to see every skill at once. Two skills that
 // declare the same `name` shadow each other — only one registers, and which one
@@ -14,7 +15,7 @@ export default {
     for (const doc of docs) {
       if (doc.kind !== 'skill') continue;
       const node = doc.frontmatter.fields.name;
-      if (!node || node.raw === '') continue;
+      if (isBlankValue(node)) continue; // a null/empty name is missing, not a collision
       const name = String(node.value);
       if (!byName.has(name)) byName.set(name, []);
       byName.get(name).push({ doc, node });

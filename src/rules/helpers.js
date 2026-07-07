@@ -5,6 +5,16 @@ export function isKebabCase(name) {
   return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(name);
 }
 
+/**
+ * True when a frontmatter field carries no usable value: absent, an empty
+ * string, or a YAML null (`null` / `~`). A null-valued required key registers
+ * as no value at all, so rules treat it exactly like a missing field rather
+ * than coercing `null` into the literal string "null".
+ */
+export function isBlankValue(node) {
+  return !node || node.raw === '' || node.value === null;
+}
+
 // Phrases that signal a description actually tells the runtime WHEN to fire the
 // skill. Without trigger guidance, a skill's description is just a summary and
 // the model has nothing to match against.

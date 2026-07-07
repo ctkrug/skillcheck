@@ -23,6 +23,31 @@ test('missing name and description are errors', () => {
   assert.equal(result.ok, false);
 });
 
+test('a null-valued required field is treated as missing', () => {
+  // `name: null` and `name: ~` are YAML null — the skill has no usable name and
+  // will not register, exactly the silent failure the linter must catch.
+  for (const nul of ['null', '~']) {
+    const result = lintText(`---\nname: ${nul}\ndescription: Use when the user asks for a thing.\n---\n`, {
+      path: 'x/SKILL.md',
+    });
+    const miss = result.diagnostics.filter((d) => d.ruleId === 'missing-field');
+    assert.equal(miss.length, 1, `name: ${nul} should be one missing-field`);
+    assert.match(miss[0].message, /name/);
+    // It must not also fire name-format on the literal string "null".
+    assert.ok(!ids(result).includes('name-format'), `name: ${nul} should not fire name-format`);
+  }
+});
+
+test('a null-valued description does not double-report', () => {
+  const result = lintText('---\nname: demo-skill\ndescription: ~\n---\n', {
+    path: 'demo-skill/SKILL.md',
+  });
+  assert.ok(ids(result).includes('missing-field'));
+  // description-quality owns nothing here — missing-field covers the empty value.
+  assert.ok(!ids(result).includes('description-too-short'));
+  assert.ok(!ids(result).includes('weak-trigger'));
+});
+
 test('a non-kebab name is an error', () => {
   const result = lintText(skill({ name: 'Bad_Name' }), { path: 'Bad_Name/SKILL.md' });
   assert.ok(ids(result).includes('name-format'));
