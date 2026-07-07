@@ -110,6 +110,23 @@ test('--init scaffolds a skill that then lints clean', () => {
   }
 });
 
+test('walking a directory skips node_modules and .git', () => {
+  const root = mkdtempSync(join(tmpdir(), 'skillcheck-'));
+  try {
+    mkdirSync(join(root, 'good-skill'));
+    writeFileSync(join(root, 'good-skill', 'SKILL.md'),
+      '---\nname: good-skill\ndescription: Use when the user wants a good example here.\n---\n');
+    // A broken skill buried in node_modules must NOT be linted.
+    mkdirSync(join(root, 'node_modules', 'pkg'), { recursive: true });
+    writeFileSync(join(root, 'node_modules', 'pkg', 'SKILL.md'), '---\nname: Bad_Name\ndescription: x\n---\n');
+    const r = run([root]);
+    assert.equal(r.status, 0, 'only the top-level skill is linted');
+    assert.match(r.stdout, /no problems/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('a missing --config file is a usage error (exit 2)', () => {
   const { root, dir } = skillDir('weak-trig', WARN_ONLY);
   try {
