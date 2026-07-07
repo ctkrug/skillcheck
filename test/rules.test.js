@@ -56,6 +56,27 @@ test('a skill file with no frontmatter at all is a missing-field error', () => {
   assert.equal(result.ok, false);
 });
 
+test('a description given as a nested map is treated as missing', () => {
+  // `description:` opening a map (not a scalar) leaves no usable value.
+  const result = lintText('---\nname: demo-skill\ndescription:\n  foo: bar\n---\n', {
+    path: 'demo-skill/SKILL.md',
+  });
+  const miss = result.diagnostics.filter((d) => d.ruleId === 'missing-field');
+  assert.ok(miss.some((d) => /description/.test(d.message)));
+});
+
+test('a non-ASCII name is flagged as not kebab-case', () => {
+  const result = lintText(skill({ name: '🔥' }), { kind: 'skill' });
+  assert.ok(ids(result).includes('name-format'));
+});
+
+test('a hyphenated known key like allowed-tools is not flagged unknown', () => {
+  const text =
+    '---\nname: demo-skill\ndescription: Use when the user needs a thing.\nallowed-tools: Read, Edit\n---\n';
+  const result = lintText(text, { path: 'demo-skill/SKILL.md' });
+  assert.ok(!ids(result).includes('unknown-key'));
+});
+
 test('a non-empty but too-short description warns', () => {
   const result = lintText(skill({ description: 'hi' }), { path: 'demo-skill/SKILL.md' });
   const short = result.diagnostics.find((d) => d.ruleId === 'description-too-short');
