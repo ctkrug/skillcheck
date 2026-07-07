@@ -436,12 +436,62 @@ body {
 .finding__hint { font-size: 13px; color: var(--ink-muted); margin-top: 3px; }
 .finding__hint::before { content: "↳ "; }
 
+/* ---- Below-the-fold reference / SEO copy ---- */
+.seo {
+  position: relative;
+  z-index: 1;
+  padding: 8px clamp(16px, 4vw, 48px) 24px;
+}
+.seo__inner {
+  max-width: 70ch;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--r-card);
+  background: var(--surface-1);
+  box-shadow: var(--shadow);
+  padding: clamp(20px, 4vw, 36px);
+}
+.seo h2 {
+  font-family: var(--font-display);
+  font-size: 25px;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+}
+.seo h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  margin: 28px 0 12px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+}
+.seo p { margin: 0 0 14px; color: var(--ink); }
+.seo code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: var(--r-chip);
+}
+.faq { margin: 0; }
+.faq dt {
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 14px;
+}
+.faq dd {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+}
+
 .footer {
   padding: 16px clamp(16px, 4vw, 48px) 28px;
   color: var(--ink-muted);
   font-size: 13px;
   border-top: 1px solid var(--line);
 }
+.footer p { margin: 4px 0; }
+.footer__portfolio { color: var(--ink-muted); }
 .footer code {
   font-family: var(--font-mono);
   background: var(--surface-2);

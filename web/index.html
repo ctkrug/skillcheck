@@ -3,8 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Skillcheck — validate AI-agent instruction files</title>
-  <meta name="description" content="Paste a CLAUDE.md, AGENTS.md, or skill file and catch broken triggers, missing frontmatter fields, and skill-name collisions before they silently fail." />
+  <title>Skillcheck — Catch broken agent instructions before they fail silently</title>
+  <meta name="description" content="Paste a CLAUDE.md, AGENTS.md, or skill file and catch broken triggers, missing frontmatter fields, and skill-name collisions before they silently fail. Runs in your browser, no upload." />
+  <meta property="og:title" content="Skillcheck — a linter for AI-agent instruction files" />
+  <meta property="og:description" content="Catch broken triggers, missing frontmatter fields, and skill-name collisions in CLAUDE.md, AGENTS.md, and SKILL.md before they silently fail." />
+  <meta property="og:type" content="website" />
   <!-- Custom favicon: drafting checkmark, blueprint cyan on ink navy. Never the default globe. -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B2A44'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%230E6E8C' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -53,7 +56,7 @@
             <label class="field">
               <span class="field__label">example</span>
               <select id="example-picker" class="select">
-                <option value="">— load an example —</option>
+                <option value="">load an example…</option>
                 <option value="clean">clean skill</option>
                 <option value="broken">broken names</option>
                 <option value="short">weak description</option>
@@ -83,11 +86,86 @@
     </div>
   </main>
 
+  <section class="seo" aria-label="About Skillcheck">
+    <div class="seo__inner">
+      <h2>A linter for AI-agent instruction files</h2>
+      <p>
+        Skillcheck validates the files that configure coding agents:
+        <code>CLAUDE.md</code>, <code>AGENTS.md</code>, and skill frontmatter
+        (<code>SKILL.md</code>). Paste a file into the editor above and it checks
+        the frontmatter and the prose the same way the command-line tool does in
+        CI. These files have no compiler and no schema, so the mistakes that stop
+        a skill from loading never raise an error. They just silently do nothing.
+        Skillcheck names the exact line so you can fix it in seconds instead of
+        losing a debugging session to "why isn't my skill firing?".
+      </p>
+      <p>
+        It flags the failure modes that actually bite: a missing <code>name</code>
+        or <code>description</code>, an unterminated <code>---</code> block, a
+        duplicate or typo'd key like <code>nmae:</code>, a name that is not
+        kebab-case or does not match its directory, a null required field
+        (<code>name: ~</code>) that reads as present but resolves to nothing, a
+        description with no trigger language, an over-long description that the
+        model host will truncate, and two skills declaring the same
+        <code>name</code> so they shadow each other. Add more than one file with
+        the tab bar to run the cross-file checks (name collisions and dead
+        <code>/skill-name</code> references) exactly as they run across a repo.
+      </p>
+      <p>
+        Nothing is uploaded. The validator runs the same pure-JavaScript engine
+        the CLI uses, entirely in your browser. To gate it on every merge, run
+        <code>npx skillcheck .claude/skills</code> in your pipeline; it exits
+        non-zero the moment a skill breaks.
+      </p>
+
+      <h3>Frequently asked questions</h3>
+      <dl class="faq">
+        <dt>Which files can Skillcheck validate?</dt>
+        <dd>
+          Skill frontmatter (<code>SKILL.md</code>), <code>CLAUDE.md</code>, and
+          <code>AGENTS.md</code>. Paste any of them above, or point the CLI at a
+          directory and it walks the tree for all three.
+        </dd>
+        <dt>Why isn't my skill loading or firing?</dt>
+        <dd>
+          The usual causes are a <code>name</code> that is not kebab-case, a
+          <code>name</code> that does not match its directory, a missing or
+          null <code>description</code>, a description with no "use when..."
+          trigger language, or a frontmatter block that is never closed with a
+          second <code>---</code>. Skillcheck reports each one with its line and
+          a fix hint.
+        </dd>
+        <dt>Does Skillcheck upload my file?</dt>
+        <dd>
+          No. The page loads the engine once and runs every check locally in the
+          browser. Your file never leaves the tab.
+        </dd>
+        <dt>Can I run the same checks in CI?</dt>
+        <dd>
+          Yes. <code>npx skillcheck .claude/skills</code> returns a non-zero exit
+          code on any error, and <code>--max-warnings 0</code> makes it fail on
+          warnings too. The CLI and this page share one engine, so they always
+          agree.
+        </dd>
+        <dt>What is a skill-name collision?</dt>
+        <dd>
+          Two skills that declare the same <code>name</code> shadow each other:
+          only one registers, and which one is not deterministic. It is
+          impossible to spot by reading a single file, so Skillcheck flags every
+          file involved.
+        </dd>
+      </dl>
+    </div>
+  </section>
+
   <footer class="footer">
     <p>
       Same engine runs in your terminal:
       <code>npx skillcheck .claude/skills</code> ·
-      <a href="https://github.com/ctkrug/skillcheck">source on GitHub</a>
+      <a href="https://github.com/ctkrug/skillcheck">View on GitHub</a>
+    </p>
+    <p class="footer__portfolio">
+      More by Charlie Krug → <a href="https://apps.charliekrug.com">apps.charliekrug.com</a>
     </p>
   </footer>
 
