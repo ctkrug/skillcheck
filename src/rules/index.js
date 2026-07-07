@@ -24,9 +24,16 @@ import missingFrontmatter from './missingFrontmatter.js';
 import nameFormat from './nameFormat.js';
 import descriptionQuality from './descriptionQuality.js';
 import duplicateKey from './duplicateKey.js';
+import unknownKey from './unknownKey.js';
 import nameCollision from './nameCollision.js';
 
-export const documentRules = [missingFrontmatter, nameFormat, descriptionQuality, duplicateKey];
+export const documentRules = [
+  missingFrontmatter,
+  nameFormat,
+  descriptionQuality,
+  duplicateKey,
+  unknownKey,
+];
 
 export const projectRules = [nameCollision];
 
