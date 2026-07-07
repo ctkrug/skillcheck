@@ -101,9 +101,9 @@ Make it pleasant to run locally and trivial to gate a repo on.
   - AC1: README/docs contain a copy-pasteable Actions step invoking skillcheck.
   - AC2: The documented command runs against this repo's own examples in CI.
 
-- [ ] **3.4 — `--init` scaffolder.** Emit a starter `SKILL.md` that passes
+- [x] **3.4 — `--init` scaffolder.** Emit a starter `SKILL.md` that passes
   Skillcheck clean.
-  - AC1: `skillcheck --init` writes a template; linting it yields zero problems.
+  - AC1: `skillcheck --init` writes a template; linting it yields zero problems. ✅
 
 ---
 
