@@ -20,6 +20,7 @@ Options:
   --quiet         suppress output; rely on the exit code
   --config <path> use this config file (default: ./skillcheck.json if present)
   --no-config     ignore any skillcheck.json (run with default rule severities)
+  --max-warnings <n>  exit non-zero if more than n warnings are found
   -h, --help      show this help
   -v, --version   print the version
 
@@ -30,7 +31,14 @@ Exit codes:
 `;
 
 function parseArgs(argv) {
-  const opts = { json: false, quiet: false, paths: [], config: undefined, noConfig: false };
+  const opts = {
+    json: false,
+    quiet: false,
+    paths: [],
+    config: undefined,
+    noConfig: false,
+    maxWarnings: Infinity,
+  };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--json') opts.json = true;
@@ -40,7 +48,12 @@ function parseArgs(argv) {
       opts.config = argv[++i];
       if (opts.config === undefined) opts.missingValue = '--config';
     } else if (arg.startsWith('--config=')) opts.config = arg.slice('--config='.length);
-    else if (arg === '-h' || arg === '--help') opts.help = true;
+    else if (arg === '--max-warnings' || arg.startsWith('--max-warnings=')) {
+      const raw = arg.includes('=') ? arg.slice('--max-warnings='.length) : argv[++i];
+      const n = Number(raw);
+      if (raw === undefined || !Number.isInteger(n) || n < 0) opts.badMaxWarnings = raw;
+      else opts.maxWarnings = n;
+    } else if (arg === '-h' || arg === '--help') opts.help = true;
     else if (arg === '-v' || arg === '--version') opts.version = true;
     else if (arg.startsWith('-')) opts.unknown = arg;
     else opts.paths.push(arg);
@@ -65,6 +78,10 @@ function main() {
   }
   if (opts.missingValue) {
     process.stderr.write(`${opts.missingValue} requires a file path\n\n${HELP}`);
+    return 2;
+  }
+  if (opts.badMaxWarnings !== undefined) {
+    process.stderr.write(`--max-warnings expects a non-negative integer\n\n${HELP}`);
     return 2;
   }
   if (opts.paths.length === 0) {
@@ -93,7 +110,17 @@ function main() {
     const out = opts.json ? renderJson(result) : renderPretty(result);
     process.stdout.write(out + '\n');
   }
-  return result.ok ? 0 : 1;
+
+  if (!result.ok) return 1;
+  if (result.summary.warnings > opts.maxWarnings) {
+    if (!opts.quiet) {
+      process.stderr.write(
+        `skillcheck: ${result.summary.warnings} warning(s) exceed --max-warnings ${opts.maxWarnings}\n`,
+      );
+    }
+    return 1;
+  }
+  return 0;
 }
 
 process.exit(main());
