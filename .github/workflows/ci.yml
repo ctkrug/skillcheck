@@ -24,5 +24,7 @@ jobs:
         run: npm test
       - name: Lint the bundled examples (smoke test)
         run: node bin/skillcheck.js examples || true
+      - name: Gate on a clean skill set (dogfood the documented command)
+        run: node bin/skillcheck.js --max-warnings 0 examples/good-skill
       - name: Build the web validator
         run: npm run build
