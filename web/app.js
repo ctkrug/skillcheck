@@ -336,15 +336,31 @@ function runLint() {
     .filter((f) => f.text.trim().length > 0)
     .map((f) => ({ path: pathOf(f), text: f.text }));
   const hasContent = sources.length > 0;
-  const result = hasContent
-    ? lintSources(sources, { config: LINT_CONFIG })
-    : { ok: true, summary: { errors: 0, warnings: 0, infos: 0 }, diagnostics: [] };
+  let result;
+  try {
+    result = hasContent
+      ? lintSources(sources, { config: LINT_CONFIG })
+      : { ok: true, summary: { errors: 0, warnings: 0, infos: 0 }, diagnostics: [] };
+  } catch (err) {
+    // The engine is contractually never-throw, but a wedged UI is never
+    // acceptable: degrade to a designed error state instead of a dead screen.
+    renderEngineError(err);
+    return;
+  }
   renderReport(result);
   setCount(counts.error, result.summary.errors);
   setCount(counts.warn, result.summary.warnings);
   setCount(counts.info, result.summary.infos);
   updateStamp(result, hasContent);
   lastResult = result;
+}
+
+function renderEngineError(err) {
+  report.innerHTML = `<div class="report__empty">
+    <div class="report__empty-title" style="color:var(--error)">Skillcheck hit an internal error</div>
+    <div>The engine couldn't finish checking this input. Edit the file to continue.</div>
+    <div class="finding__hint">${escapeHtml(String(err && err.message ? err.message : err))}</div>
+  </div>`;
 }
 
 // ---- Controls ----
