@@ -96,10 +96,10 @@ Make it pleasant to run locally and trivial to gate a repo on.
   - AC1: `--max-warnings 0` exits non-zero when warnings exist. ✅
   - AC2: Default behavior (warnings allowed) is unchanged. ✅
 
-- [ ] **3.3 — Ready-to-copy CI + pre-commit recipes.** Document a GitHub Action
+- [x] **3.3 — Ready-to-copy CI + pre-commit recipes.** Document a GitHub Action
   step and a pre-commit hook using the CLI.
-  - AC1: README/docs contain a copy-pasteable Actions step invoking skillcheck.
-  - AC2: The documented command runs against this repo's own examples in CI.
+  - AC1: README/docs contain a copy-pasteable Actions step invoking skillcheck. ✅
+  - AC2: The documented command runs against this repo's own examples in CI. ✅
 
 - [x] **3.4 — `--init` scaffolder.** Emit a starter `SKILL.md` that passes
   Skillcheck clean.
