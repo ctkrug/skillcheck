@@ -2,7 +2,7 @@
 // Skillcheck CLI. Lints instruction files and exits non-zero when errors are
 // found, so it drops straight into CI or a pre-commit hook.
 
-import { lintPaths, loadConfig, findConfig } from '../src/index.js';
+import { lintPaths, loadConfig, findConfig, initSkill } from '../src/index.js';
 import { renderPretty } from '../src/reporters/pretty.js';
 import { renderJson } from '../src/reporters/json.js';
 
@@ -15,7 +15,10 @@ Arguments:
   path            file or directory to lint (directories are walked for
                   SKILL.md, CLAUDE.md, and AGENTS.md)
 
+  skillcheck --init [name]     scaffold a lint-clean starter skill
+
 Options:
+  --init [name]   write a starter <name>/SKILL.md (default name: my-skill)
   --json          emit machine-readable JSON instead of the text report
   --quiet         suppress output; rely on the exit code
   --config <path> use this config file (default: ./skillcheck.json if present)
@@ -41,7 +44,8 @@ function parseArgs(argv) {
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === '--json') opts.json = true;
+    if (arg === '--init') opts.init = true;
+    else if (arg === '--json') opts.json = true;
     else if (arg === '--quiet') opts.quiet = true;
     else if (arg === '--no-config') opts.noConfig = true;
     else if (arg === '--config') {
@@ -84,6 +88,19 @@ function main() {
     process.stderr.write(`--max-warnings expects a non-negative integer\n\n${HELP}`);
     return 2;
   }
+
+  if (opts.init) {
+    const name = opts.paths[0] || 'my-skill';
+    try {
+      const file = initSkill(name);
+      process.stdout.write(`created ${file}\nRun \`skillcheck ${name}\` to lint it.\n`);
+      return 0;
+    } catch (err) {
+      process.stderr.write(`skillcheck: ${err.message}\n`);
+      return 2;
+    }
+  }
+
   if (opts.paths.length === 0) {
     process.stderr.write(`no paths given\n\n${HELP}`);
     return 2;
