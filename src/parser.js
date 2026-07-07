@@ -16,11 +16,20 @@
  */
 
 /**
+ * @typedef {Object} DuplicateKey
+ * @property {string} key
+ * @property {number} line        line of the repeated occurrence
+ * @property {number} column
+ * @property {number} firstLine   line of the first occurrence we kept
+ */
+
+/**
  * @typedef {Object} Frontmatter
  * @property {boolean} present  was a `---` fenced block found at the top?
  * @property {boolean} closed   was it terminated by a closing `---`?
  * @property {Object<string, FieldNode>} fields   top-level scalar keys
  * @property {Object<string, Object<string, FieldNode>>} maps  one-level nested maps
+ * @property {DuplicateKey[]} duplicates   repeated top-level keys (first kept)
  * @property {number} startLine
  * @property {number} endLine
  */
@@ -59,6 +68,7 @@ function parseFrontmatter(lines) {
     closed: false,
     fields: {},
     maps: {},
+    duplicates: [],
     startLine: 0,
     endLine: 0,
   };
@@ -66,9 +76,35 @@ function parseFrontmatter(lines) {
   // Frontmatter must be the very first non-empty content.
   let start = 0;
   while (start < lines.length && lines[start].trim() === '') start++;
-  if (start >= lines.length || lines[start].trim() !== '---') return empty;
+  if (start >= lines.length || lines[start].trim() !== '---') return { ...empty };
 
-  const fm = { ...empty, present: true, startLine: start + 1, fields: {}, maps: {} };
+  const fm = {
+    ...empty,
+    present: true,
+    startLine: start + 1,
+    fields: {},
+    maps: {},
+    duplicates: [],
+  };
+
+  // Record a top-level key. YAML lets the last value win on a repeat, but a
+  // repeat is almost always a mistake, so we keep the FIRST occurrence and log
+  // the duplicate for the duplicate-key rule to report.
+  const setField = (key, node) => {
+    if (Object.prototype.hasOwnProperty.call(fm.fields, key)) {
+      fm.duplicates.push({
+        key,
+        line: node.line,
+        column: node.column,
+        firstLine: fm.fields[key].line,
+      });
+      return false;
+    }
+    fm.fields[key] = node;
+    return true;
+  };
+
+  const indentOf = (l) => l.length - l.trimStart().length;
 
   let currentMap = null; // key name when we're inside a nested map
   let i = start + 1;
@@ -81,34 +117,81 @@ function parseFrontmatter(lines) {
     }
     if (line.trim() === '' || line.trim().startsWith('#')) continue;
 
-    const indent = line.length - line.trimStart().length;
+    const indent = indentOf(line);
     const match = line.trimStart().match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/);
     if (!match) {
       currentMap = null;
       continue;
     }
     const [, key, rest] = match;
-    const node = {
+
+    // Nested map entry (e.g. under `metadata:`).
+    if (indent > 0) {
+      if (currentMap) {
+        fm.maps[currentMap][key] = {
+          key,
+          value: parseScalar(rest),
+          raw: rest.trim(),
+          line: i + 1,
+          column: indent + 1,
+        };
+      }
+      continue;
+    }
+
+    // ---- Top-level key ----
+    currentMap = null;
+
+    // Block (`|`) or folded (`>`) scalar, with optional chomping indicator.
+    const block = rest.trim().match(/^([|>])[+-]?$/);
+    if (block) {
+      const collected = [];
+      let j = i + 1;
+      for (; j < lines.length; j++) {
+        const l = lines[j];
+        if (l.trim() === '---') break;
+        if (l.trim() !== '' && indentOf(l) === 0) break; // next top-level key
+        collected.push(l);
+      }
+      while (collected.length && collected[0].trim() === '') collected.shift();
+      while (collected.length && collected[collected.length - 1].trim() === '') collected.pop();
+      const nonEmpty = collected.filter((l) => l.trim() !== '');
+      const baseIndent = nonEmpty.length ? Math.min(...nonEmpty.map(indentOf)) : 0;
+      const stripped = collected.map((l) => l.slice(baseIndent));
+      // `|` keeps newlines; `>` folds them into spaces.
+      const value =
+        block[1] === '|' ? stripped.join('\n') : stripped.map((s) => s.trim()).join(' ').trim();
+      setField(key, { key, value, raw: value, line: i + 1, column: indent + 1 });
+      i = j - 1;
+      continue;
+    }
+
+    // A bare `key:` opens a nested map (e.g. metadata:).
+    if (rest.trim() === '') {
+      const node = { key, value: '', raw: '', line: i + 1, column: indent + 1 };
+      if (setField(key, node)) fm.maps[key] = {};
+      currentMap = key;
+      continue;
+    }
+
+    // Plain scalar — may fold across more-indented continuation lines.
+    let raw = rest.trim();
+    let j = i + 1;
+    for (; j < lines.length; j++) {
+      const l = lines[j];
+      if (l.trim() === '' || l.trim() === '---') break;
+      if (indentOf(l) === 0) break; // sibling key ends the scalar
+      raw += ' ' + l.trim();
+    }
+    const folded = j > i + 1;
+    setField(key, {
       key,
-      value: parseScalar(rest),
-      raw: rest.trim(),
+      value: folded ? raw : parseScalar(rest),
+      raw,
       line: i + 1,
       column: indent + 1,
-    };
-
-    if (indent === 0) {
-      if (rest.trim() === '') {
-        // A bare `key:` opens a nested map (e.g. metadata:).
-        currentMap = key;
-        fm.maps[key] = {};
-        fm.fields[key] = node;
-      } else {
-        currentMap = null;
-        fm.fields[key] = node;
-      }
-    } else if (currentMap) {
-      fm.maps[currentMap][key] = node;
-    }
+    });
+    i = j - 1;
   }
 
   if (!fm.closed) fm.endLine = lines.length;
