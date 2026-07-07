@@ -1,8 +1,8 @@
 # Skillcheck — Rule Reference
 
 Every diagnostic Skillcheck emits carries a stable `ruleId`. This is the catalog.
-Severity is the default; a future config (`skillcheck.json`, backlog 2.5) will let
-you override per rule.
+Severity is the default; a `skillcheck.json` config lets you override per rule
+(see [Configuring rules](#configuring-rules)).
 
 | Rule ID | Default | Applies to | What it catches |
 | --- | --- | --- | --- |
@@ -33,6 +33,28 @@ to a real "why isn't my skill working?" bug:
 - **error** → the CLI exits `1`. Fails CI.
 - **warning** / **info** → reported, but the CLI exits `0` by default. Use
   `--max-warnings 0` (backlog 3.2) to gate on warnings too.
+
+## Configuring rules
+
+Drop a `skillcheck.json` next to where you run the CLI (or point at one with
+`--config <path>`; `--no-config` ignores it). Each key is a rule id from the
+table above; each value is a severity or `off`:
+
+```json
+{
+  "rules": {
+    "weak-trigger": "off",
+    "name-format": "warning",
+    "duplicate-name": "error"
+  }
+}
+```
+
+- `off` (or `false`) — silence the rule entirely.
+- `"error"` / `"warning"` / `"info"` — force that severity (this can promote a
+  warning to a CI-failing error, or the reverse).
+- An unknown rule id or an invalid severity fails fast with a clear message —
+  a typo in your config never silently does nothing.
 
 ## Adding a rule
 
