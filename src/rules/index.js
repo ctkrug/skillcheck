@@ -23,9 +23,10 @@
 import missingFrontmatter from './missingFrontmatter.js';
 import nameFormat from './nameFormat.js';
 import descriptionQuality from './descriptionQuality.js';
+import duplicateKey from './duplicateKey.js';
 import nameCollision from './nameCollision.js';
 
-export const documentRules = [missingFrontmatter, nameFormat, descriptionQuality];
+export const documentRules = [missingFrontmatter, nameFormat, descriptionQuality, duplicateKey];
 
 export const projectRules = [nameCollision];
 
@@ -36,5 +37,7 @@ export const allRuleIds = [
   'description-too-long',
   'description-too-short',
   'weak-trigger',
+  'duplicate-key',
+  'unknown-key',
   'duplicate-name',
 ];
