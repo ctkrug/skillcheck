@@ -71,10 +71,10 @@ toy subset.
     present skill does not.
   - AC2: The rule only runs when more than one document is linted (needs context).
 
-- [ ] **2.4 — Reserved / duplicate-key rules.** Detect duplicate frontmatter keys
+- [x] **2.4 — Reserved / duplicate-key rules.** Detect duplicate frontmatter keys
   and unknown top-level keys for skills.
-  - AC1: A frontmatter with two `name:` lines errors on the second.
-  - AC2: An unknown key like `nmae:` (typo of a required key) warns with a hint.
+  - AC1: A frontmatter with two `name:` lines errors on the second. ✅
+  - AC2: An unknown key like `nmae:` (typo of a required key) warns with a hint. ✅
 
 - [ ] **2.5 — Config + rule toggles.** A `skillcheck.json` (or flags) to disable
   rules or set severity.
